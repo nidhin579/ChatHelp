@@ -1,0 +1,39 @@
+class _ChatList extends ViewModelWidget<ChatScreenViewModel> {
+  const _ChatList({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ChatScreenViewModel model) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Chat')
+          .doc("W_id")
+          .collection("case_id")
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        return ListView.builder(
+          padding: const EdgeInsets.all(10.0),
+          itemCount: snapshot.data.docs.length,
+          itemBuilder: (_, index) {
+            Message message =
+                Message.fromJson(snapshot.data.docs[index].data());
+            return message.type == "Text"
+                ? MessageBubble(
+                    isMe: model.isMe(message.userId),
+                    message: message?.message,
+                    messageSentTime: DateTime.parse(message?.dateTime),
+                    sender: message?.username,
+                  )
+                : VoiceBubble(
+                    isMe: model.isMe(message.userId),
+                    playing: message.message==model.currentPlayUrl,
+                    messageSentTime: DateTime.parse(message?.dateTime),
+                    sender: message?.username,
+                    play: () => model.play(message.message),
+                  );
+          },
+        );
+      },
+    );
+  }
+}
