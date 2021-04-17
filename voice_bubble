@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+
+class VoiceBubble extends StatelessWidget {
+  final bool playing;
+  final bool isMe;
+  final DateTime messageSentTime;
+  final sender;
+  final VoidCallback play;
+
+  VoiceBubble({this.playing, this.messageSentTime, this.isMe,this.sender,this.play});
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: <Widget>[
+          Material(
+            elevation: 2,
+            borderRadius: isMe
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
+                    bottomRight: Radius.circular(10.0))
+                : BorderRadius.only(
+                    topRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
+                    bottomRight: Radius.circular(10.0)),
+            color: isMe == true
+                ? Color.fromRGBO(220, 255, 255, 1.0)
+                : Color.fromRGBO(255, 236, 197, 1.0),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(isMe?"me":sender,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                        color: Color(0xff858aa0),
+                        fontSize: 11.0),
+                  ),
+                  SizedBox(height: 2.0),
+                  GestureDetector(
+                    child: Icon(
+                      playing ? Icons.stop : Icons.play_arrow,
+                      size: 40,
+                      color: AppColor.primary,
+                    ),
+                    onTap: () =>play.call(),
+                  ),
+                  // SoundPlayerUI.fromTrack(track),
+                  // RaisedButton(child: Text("Pause"), onPressed: () => playerStateKey.currentState.pause()),
+                  // RaisedButton(child: Text("Resume"), onPressed: () => playerStateKey.currentState.resume()),
+                  // Text('${widget.message}',
+                  //     textAlign: TextAlign.start,
+                  //     style: TextStyle(
+                  //         fontSize: 14.0,
+                  //         fontFamily: 'SFProDisplay-Light',
+                  //         color: Color.fromRGBO(46, 46, 46,
+                  //             1.0) //isMe ? Colors.white : Colors.black54,
+                  //     )),
+                  SizedBox(height: 2.0),
+                  Text(
+                    DateTime(messageSentTime.year, messageSentTime.month,
+                                messageSentTime.day) ==
+                            DateTime(now.year, now.month, now.day)
+                        ? '${DateFormat.jm().format(messageSentTime)}'
+                        : '${DateFormat.MMMd().format(messageSentTime)} ${DateFormat.jm().format(messageSentTime)}',
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                        color: Color(0xff858aa0),
+                        fontSize: 11.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
