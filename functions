@@ -29,3 +29,22 @@
   
   
   //////////////////////////////////////////////////////////////////////////////
+double imageUploadPercentage = 0;
+
+  Future<String> uploadFileFromChat(File file) async {
+    try {
+      var response = await locator<CommonApiService>().uploadFileFromChat(
+        file?.path,
+        getFileName(file),
+        onProgress: (sent, total) {
+          imageUploadPercentage = sent / total;
+          notifyListeners();
+        },
+      );
+      if (response != null) return response.result;
+      return null;
+    } catch (_) {}
+    return null;
+  }
+  
+  //////////////////////////////////////////////////////////////
