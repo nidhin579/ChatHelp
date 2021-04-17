@@ -1,0 +1,28 @@
+double imageUploadPercentage = 0;
+
+  Future<String> uploadFromChat(File file) async {
+    try {
+      var response = await uploadFileFromChat(
+        file?.path,
+        file != null ? basename(file.path) : null,
+        onProgress: (sent, total) {
+          imageUploadPercentage = sent / total;
+          notifyListeners();
+        },
+      );
+      if (response != null) return response.result;
+      return null;
+    } catch (_) {}
+    return null;
+  }
+
+Future<FileUploadResponse> uploadFileFromChat(
+      String filePath, String fileName,
+      {Map<String, dynamic> data,
+      String fileKey = "fileUrl",
+      Function(int sent, int total) onProgress}) async {
+    final response = await service.fileUpload(
+        uploadSoundUrl, filePath, fileName,
+        data: data, fileKey: fileKey, onProgress: onProgress);
+    return FileUploadResponse.fromJson(response);
+  }
