@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:proficient_lawyer/app/utils/toast_util.dart';
-import 'package:proficient_lawyer/ui/media/app_colors.dart';
 import 'package:random_string/random_string.dart';
 import 'package:vibrate/vibrate.dart';
 
