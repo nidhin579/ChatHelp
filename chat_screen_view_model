@@ -1,12 +1,4 @@
-import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:proficient_lawyer/app/locator.dart';
-import 'package:proficient_lawyer/models/message.dart';
-import 'package:proficient_lawyer/service/account_service.dart';
-import 'package:proficient_lawyer/service/chat_service.dart';
-import 'package:stacked/stacked.dart';
 
 class ChatScreenViewModel extends BaseViewModel {
   final AccountService _accountService = locator<AccountService>();
