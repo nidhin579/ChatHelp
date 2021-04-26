@@ -1,0 +1,121 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:proficient_lawyer/app/locator.dart';
+import 'package:proficient_lawyer/models/message.dart';
+import 'package:proficient_lawyer/service/account_service.dart';
+import 'package:proficient_lawyer/service/chat_service.dart';
+import 'package:stacked/stacked.dart';
+
+class ChatScreenViewModel extends BaseViewModel {
+  final AccountService _accountService = locator<AccountService>();
+  final ChatService _chatService = locator<ChatService>();
+
+  String groupId;
+
+  ChatScreenViewModel(this.groupId) {
+    initState();
+  }
+
+  FlutterSoundPlayer _myPlayer = FlutterSoundPlayer();
+
+  bool _mPlayerIsInited = false;
+
+  set mPlayerIsInited(bool val) {
+    _mPlayerIsInited = val;
+    notifyListeners();
+  }
+
+  void initState() {
+    _myPlayer.openAudioSession().then((value) {
+      mPlayerIsInited = true;
+    });
+  }
+
+  void sendText(String text) {
+    Message message = Message()
+      ..message = text
+      ..type = "Text"
+      ..userId = _accountService.user.id
+      ..username = _accountService.user.firstName
+      ..dateTime = DateTime.now().toString();
+    addMessageToDb(message);
+  }
+
+  void sendVoice(File file) async {
+    if (file != null) {
+      Message message = Message()
+        ..type = "Voice"
+        ..userId = _accountService.user.id
+        ..username = _accountService.user.firstName;
+      String uploadUrl = await _chatService.uploadFileFromChat(file);
+      if (uploadUrl != null) {
+        message
+          ..message = uploadUrl
+          ..dateTime = DateTime.now().toString();
+        addMessageToDb(message);
+      }
+    }
+  }
+
+  void addMessageToDb(Message message) {
+    var documentReference = FirebaseFirestore.instance
+        .collection('Chat')
+        .doc("W_id")
+        .collection("case_id")
+        .doc(DateTime.now().millisecondsSinceEpoch.toString());
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(
+        documentReference,
+        message.toJson(),
+      );
+    }).then((value) {
+    });
+  }
+
+  bool isMe(String userId) {
+    if (_accountService.user.id == userId) return true;
+    return false;
+  }
+
+  String _currentPlayUrl;
+
+  String get currentPlayUrl => _currentPlayUrl;
+
+  set currentPlayUrl(String url) {
+    _currentPlayUrl = url;
+    notifyListeners();
+  }
+
+  void play(String url) async {
+    if (url == currentPlayUrl) {
+      await stopPlayer();
+      return;
+    }
+    await stopPlayer();
+    currentPlayUrl = url;
+    await _myPlayer.startPlayer(
+        fromURI: url,
+        codec: Codec.aacADTS,
+        whenFinished: () {
+          currentPlayUrl = null;
+        });
+    notifyListeners();
+  }
+
+  Future<void> stopPlayer() async {
+    if (_myPlayer != null) {
+      await _myPlayer.stopPlayer();
+    }
+    currentPlayUrl = null;
+  }
+
+  @override
+  void dispose() {
+    _myPlayer.closeAudioSession();
+    _myPlayer = null;
+    super.dispose();
+  }
+}
